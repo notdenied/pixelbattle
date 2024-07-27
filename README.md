@@ -1,2 +1,4 @@
 # pixelbattle
-My own Pixelbattle!
+
+debug server:
+uvicorn server:app --reload

@@ -1,27 +1,70 @@
+<canvas width="1000" height="1000">
+    pixel map
+</canvas>
+
 <script>
-    let socket = new WebSocket("ws://localhost:8000/ws");
+    const width = 100;
+    const height = 100;
+
+    const canvas = document.querySelector("canvas");
+    const ctx = canvas.getContext("2d");
+
+    function draw_pixel(x, y, color) {
+        const k = 10;
+        ctx.fillStyle = color;
+        ctx.fillRect(x * k, y * k, k, k);
+    }
+
+    function send_pixel(x, y, color) {
+        socket.send(JSON.stringify({ 'type': 'put_pixel', 'content': { 'x': x, 'y': y, 'color': color } }));
+    }
+
+    function div(val, by) {
+        return (val - val % by) / by;
+    }
+
+    var pixels_map = new Array(width * height).fill(0);
+</script>
+
+<script>
+    let socket = new WebSocket("ws://localhost:8000/ws?a=1");
 
     socket.onopen = function (e) {
-        console.log("[open] Соединение установлено");
-        console.log("Отправляем данные на сервер");
-        socket.send("Меня зовут Джон");
+        console.log("[open]");
     };
 
     socket.onmessage = function (event) {
         console.log(`[message] Данные получены с сервера: ${event.data}`);
+
+        var data = JSON.parse(event.data);
+
+        if (data.type == 'draw_pixel') {
+            pixels_map[data.content.y * width + data.content.x] = Math.max(pixels_map[data.content.y * width + data.content.x], data.content.event_id);
+
+            if (pixels_map[data.content.y * width + data.content.x] == data.content.event_id) {
+                draw_pixel(data.content.x, data.content.y, data.content.color);
+            }
+        }
+
+        else if (data.type == 'draw_initial_map') {
+            for (let i = 0; i < width * height; i++) {
+                var x = i % width;
+                var y = div(i, width);
+                if (pixels_map[i] == 0)
+                    draw_pixel(x, y, data.content[i]);
+            }
+        }
     };
 
     socket.onclose = function (event) {
         if (event.wasClean) {
             console.log(`[close] Соединение закрыто чисто, код=${event.code} причина=${event.reason}`);
         } else {
-            // например, сервер убил процесс или сеть недоступна
-            // обычно в этом случае event.code 1006
             console.log('[close] Соединение прервано');
         }
     };
 
     socket.onerror = function (error) {
-        console.log(`[error]`);
+        console.log('[error]', error);
     };
 </script>
