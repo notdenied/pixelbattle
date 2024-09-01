@@ -1,4 +1,6 @@
-from contants import WIDTH, HEIGHT
+import time
+
+from contants import WIDTH, HEIGHT, COOLDOWN
 from database import *
 
 from sqlalchemy.orm import Session
@@ -25,6 +27,22 @@ class Canvas:
                 session.add(Pixel(x=x, y=y, color=color))
 
             session.commit()
+
+    async def handle_put_pixel(self, user_id):
+        with Session(engine) as session:
+            query = select(User).where(User.user_id == user_id)
+            user = session.scalars(query).one_or_none()
+            if not user:
+                print("USER NOT FOUND! in handle")
+                return False  # ???
+            cur_time = round(time.time()*1000)
+            if cur_time - user.last_pixel_time >= COOLDOWN:
+                user.last_pixel_time = cur_time
+                session.commit()
+                print('placed...', cur_time, user.last_pixel_time)
+                return cur_time  # rework?
+            else:
+                return False
 
     def get_map(self):
         return self.data

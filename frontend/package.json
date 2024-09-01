@@ -1,0 +1,24 @@
+{
+  "name": "pb_front",
+  "version": "0.0.3",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 fix.py $(pwd) && parcel index.html --open",
+    "build": "python3 fix.py $(pwd) && parcel build index.html"
+  },
+  "dependencies": {
+    "@mui/icons-material": "^5.16.7",
+    "@mui/material": "^5.16.7",
+    "@types/react": "^18.3.4",
+    "parcel-bundler": "^1.6.1",
+    "pixi-graphpaper": "^2.0.1",
+    "pixi-viewport": "^4.38.0",
+    "pixi.js": "^6.5.10",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@babel/core": "7.2.0",
+    "@babel/preset-react": "^7.24.7"
+  }
+}
