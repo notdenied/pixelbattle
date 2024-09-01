@@ -2,6 +2,8 @@ import { draw_pixel } from "./graphics";
 import { width, height, draw_cooldown } from "./constants";
 
 import './globals';
+import { ws_url, auth_url } from "./constants";
+
 
 function finish_loading() {
     document.querySelector("canvas").style.removeProperty('display');
@@ -9,8 +11,6 @@ function finish_loading() {
     document.querySelector(".palette").style.removeProperty('display');
     globalThis.loading = false;
 }
-
-// finish_loading();
 
 function send_pixel(x, y, color) {
     let time = draw_cooldown * 1000 - (Date.now() - globalThis.last_pixel_drawn_time);
@@ -54,7 +54,7 @@ if (auth_token) {
 
 var pixels_map = new Array(width * height).fill(0);
 
-let socket = new WebSocket("ws://localhost:8000/ws");
+let socket = new WebSocket(ws_url);
 
 socket.onopen = function (e) {
     console.log("[open]");
@@ -85,7 +85,7 @@ socket.onmessage = function (event) {
     }
 
     else if (data.type == 'need_reauth') {
-        window.location.replace("http://localhost:8000/get_auth_url");
+        window.location.replace(auth_url);
     }
 
     else if (data.type == 'placed_time') {

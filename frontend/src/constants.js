@@ -10,4 +10,7 @@ const draw_cooldown = 10;
 const back_color = 0x0123;
 const colors = ["000000", "858585", "FFFFFF", "FF218B", "FE2000", "FFA500", "FCF700", "00EE00", "3AAFFF", "074BF3", "4D2C9C"];
 
-export { draw_cooldown, width, height, default_zoom, min_scale, max_scale, back_color, colors };
+const ws_url = 'wss://ws.c3po.ru/ws';
+const auth_url = "https://ws.c3po.ru/get_auth_url";
+
+export { draw_cooldown, width, height, default_zoom, min_scale, max_scale, back_color, colors, ws_url, auth_url };

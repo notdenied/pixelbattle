@@ -1,5 +1,4 @@
 import uuid
-import json
 
 from yandexid import AsyncYandexOAuth
 from yandexid import AsyncYandexID
