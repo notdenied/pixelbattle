@@ -101,6 +101,9 @@ function show_error_alert() {
 }
 
 socket.onclose = function (event) {
+    console.log('ws error:');
+    console.log(event);
+
     if (event.wasClean) {
         console.log(`[close] Соединение закрыто чисто, код=${event.code} причина=${event.reason}`);
     } else {
@@ -111,7 +114,8 @@ socket.onclose = function (event) {
 };
 
 socket.onerror = function (error) {
-    console.log('[error]', error);
+    console.log('ws error:');
+    console.log(error);
 
     show_error_alert();
 };

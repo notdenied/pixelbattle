@@ -3,7 +3,7 @@
 Simple pixelbattle implementation.
 
 run backend server:
-- `cd backend && uvicorn server:app --host 0.0.0.0 [--reload]`
+- `cd backend && python3 -m uvicorn server:app --host 0.0.0.0 [--reload]`
 
 settings:
 - `vim config.json`

@@ -3,3 +3,4 @@ sqlalchemy_utils
 pymysql
 fastapi
 yandexid
+uvicorn[standard]
