@@ -1,6 +1,7 @@
 import json
 import time
 import asyncio
+import logging
 
 from fastapi import FastAPI, Response
 from fastapi.websockets import WebSocket
@@ -9,6 +10,7 @@ from fastapi.responses import RedirectResponse
 import starlette.websockets
 
 from auth import *
+from config import front_url
 from canvas import Canvas
 
 
@@ -20,13 +22,15 @@ current_event_number = 1
 
 app = FastAPI()
 
+logger = logging.getLogger('uvicorn.error')
 
-async def broadcast_pixel_impl(params):
+
+async def broadcast_pixel_impl(params) -> None:
     data, user = params
     try:
         await user.send_text(data)
     except Exception as err:
-        print('broadcast err:', err)
+        logger.error('broadcast err:', err)
 
 
 async def broadcast_pixel(x, y, color, event_id) -> None:
@@ -36,7 +40,7 @@ async def broadcast_pixel(x, y, color, event_id) -> None:
 
 
 @app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
+async def websocket_endpoint(websocket: WebSocket) -> None:
     global current_uid_number, current_event_number
 
     await websocket.accept()
@@ -44,13 +48,15 @@ async def websocket_endpoint(websocket: WebSocket):
     cookies = dict(websocket.cookies.items())
 
     if 'auth_token' not in cookies:
-        await websocket.send_text(json.dumps({'type': 'need_reauth'}))
+        logger.error(f'auth_token not in cookies: {cookies}')
+        await websocket.send_text(json.dumps({'type': 'need_reauth', 'error': 'no_cookie'}))
         return
 
     user_id, last_placed = await get_user_by_cookie(cookies['auth_token'])
-    print('get_user_by_cookie', user_id, cookies)
+    logger.error('get_user_by_cookie', user_id, cookies)
     if user_id == -1:
-        await websocket.send_text(json.dumps({'type': 'need_reauth'}))
+        logger.error('user not found', cookies)
+        await websocket.send_text(json.dumps({'type': 'need_reauth', 'error': 'user_not_found'}))
         return
 
     local_uid = current_uid_number
@@ -77,27 +83,30 @@ async def websocket_endpoint(websocket: WebSocket):
                 current_event_number += 1
                 await broadcast_pixel(x, y, color, event_id)
             else:
-                print('unknown message recieved!', message)
+                logger.error('unknown message recieved!', message)
 
         except starlette.websockets.WebSocketDisconnect:
-            print('disconnect')
+            logger.error('disconnect')
             del clients[local_uid]
             return
         except Exception as err:
-            print('unknown err', err)
+            logger.error('unknown err', err)
             del clients[local_uid]
             return
 
 
 @ app.get("/get_auth_url")
-async def yandex_get_auth_url():
+async def yandex_get_auth_url() -> RedirectResponse:
     return RedirectResponse(get_auth_url())
 
 
 @ app.get("/handle_code")
-async def yandex_get_user_info(response: Response, code: str, cid: str):  # cid - ???
+async def yandex_get_user_info(code: str, cid: str) -> RedirectResponse:  # cid - ???
     user = await get_user_by_code(code)
     # TODO: only phystech.edu mails
     cookie = await handle_user_auth(user.default_email)
 
-    return RedirectResponse(f'http://localhost:1234/?auth_token={cookie}')
+    response = RedirectResponse(front_url)
+    response.set_cookie(key="auth_token", value=cookie, expires=int(time.time()) + 365 * 86400, secure=True, httponly=True)
+
+    return response
