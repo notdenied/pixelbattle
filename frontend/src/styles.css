@@ -68,8 +68,9 @@ canvas {
   font-size: large;
 }
 
-.new-line {
-  white-space: pre-line;
+.snackbar_alert {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  /* TODO: beffer font? */
 }
 
 @keyframes appear {

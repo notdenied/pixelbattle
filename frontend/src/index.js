@@ -6,11 +6,12 @@ import App from './bottom';
 
 import { LoadingScreen } from "./loading";
 
+import "./globals";
+
+import Snackbar from "./snackbar";
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-
-import Alert from '@mui/material/Alert';
-import Button from '@mui/material/Button';
 
 
 // Background grid for reference
@@ -26,18 +27,7 @@ root.render(
     <div>
         <LoadingScreen />
         <App />
-        <div className="alert_load_error" style={{display: 'none'}}>
-            <Alert
-                severity="error"
-                action={
-                    <Button color="inherit" size="small" onClick={() => { window.location.reload() }}>
-                        Reload
-                    </Button>
-                }
-            >
-                Произошла непредвиденная ошибка, попробуй перезагрузить страницу...
-            </Alert>
-        </div>
+        <Snackbar />
     </div>
 );
 

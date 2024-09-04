@@ -68,8 +68,8 @@ function handle_move(e) {
 function handle_up(e) {
   const pos = pos_to_coords(viewport.toWorld(e.data.global));
   if (!mooved) {
-    console.log('handling click:');
-    console.log({ x: pos.x, y: pos.y });
+    // console.log('handling click:');
+    // console.log({ x: pos.x, y: pos.y });
     handle_click(pos.x, pos.y);
   }
 }
@@ -83,7 +83,7 @@ viewport.on('mousemove', (e) => {
 });
 
 viewport.on('mouseup', (e) => {
-  console.log('mouseup');
+  // console.log('mouseup');
   handle_up(e);
 });
 
@@ -97,7 +97,7 @@ viewport.on('touchmove', (e) => {
 
 viewport.on('touchend', (e) => {
   handle_up(e);
-  console.log('touchend');
+  // console.log('touchend');
 });
 
 app.stage.addChild(viewport);

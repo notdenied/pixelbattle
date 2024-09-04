@@ -4,6 +4,8 @@ import { width, height, draw_cooldown } from "./constants";
 import './globals';
 import { ws_url, auth_url } from "./constants";
 
+import ReconnectingWebSocket from "./reconnecting_socket";
+
 
 function finish_loading() {
     document.querySelector("canvas").style.removeProperty('display');
@@ -13,17 +15,28 @@ function finish_loading() {
 }
 
 function send_pixel(x, y, color) {
+    if (!globalThis.socket_opened) {
+        globalThis.add_snackbar_error_alert('Нет соединения с сервером! Попробуйте обновить страницу...');
+        return;
+    }
+
+    if (pixels_colors[y * width + x] == color) {
+        globalThis.add_snackbar_info_alert('Пиксель не поставлен - он уже покрашен в этот цвет!');
+        return;
+    }
+
     let time = draw_cooldown * 1000 - (Date.now() - globalThis.last_pixel_drawn_time);
     if (time >= 0) {
         // time = Math.ceil(time / 1000);
-        alert('cant draw');
+        globalThis.add_snackbar_info_alert('Пиксель не поставлен - кулдаун ещё не прошёл!');
         return;
     }
 
     globalThis.last_pixel_drawn_time = Date.now(); // TODO: add ~ping?
+
     // Костыль: рисуем у себя локально с минимальным приоритетом, затем высылаем.
     socket.send(JSON.stringify({ 'type': 'put_pixel', 'content': { 'x': x, 'y': y, 'color': color } }));
-    pixels_map[y * width + x] = 0;
+    pixels_priority[y * width + x] = 0;
     draw_pixel(x, y, color);
 }
 
@@ -31,35 +44,15 @@ function div(val, by) {
     return (val - val % by) / by;
 }
 
-//
-function setCookie(name, value, days) {
-    var expires = "";
-    if (days) {
-        var date = new Date();
-        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 365));
-        expires = "; expires=" + date.toUTCString();
-    }
-    document.cookie = name + "=" + (value || "") + expires + "; path=/";
-}
+var pixels_priority = new Array(width * height).fill(0);
+var pixels_colors = new Array(width * height).fill(0);
 
-function getCookie(name) {
-    var nameEQ = name + "=";
-    var ca = document.cookie.split(';');
-    for (var i = 0; i < ca.length; i++) {
-        var c = ca[i];
-        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
-        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
-    }
-    return null;
-}
-//
-
-var pixels_map = new Array(width * height).fill(0);
-
-let socket = new WebSocket(ws_url);
+let socket = new ReconnectingWebSocket(ws_url + '?time=' + Date.now());
+globalThis.socket_opened = false;
 
 socket.onopen = function (e) {
     console.log("[open]");
+    globalThis.socket_opened = true;
 };
 
 socket.onmessage = function (event) {
@@ -68,9 +61,10 @@ socket.onmessage = function (event) {
     var data = JSON.parse(event.data);
 
     if (data.type == 'draw_pixel') {
-        pixels_map[data.content.y * width + data.content.x] = Math.max(pixels_map[data.content.y * width + data.content.x], data.content.event_id);
+        pixels_priority[data.content.y * width + data.content.x] = Math.max(pixels_priority[data.content.y * width + data.content.x], data.content.event_id);
 
-        if (pixels_map[data.content.y * width + data.content.x] == data.content.event_id) {
+        if (pixels_priority[data.content.y * width + data.content.x] == data.content.event_id) {
+            pixels_colors[data.content.y * width + data.content.x] = data.content.color;
             draw_pixel(data.content.x, data.content.y, data.content.color);
         }
     }
@@ -80,14 +74,16 @@ socket.onmessage = function (event) {
         for (let i = 0; i < width * height; i++) {
             var x = i % width;
             var y = div(i, width);
-            if (pixels_map[i] == 0)
+            if (pixels_priority[i] == 0) {
+                pixels_colors[y * width + x] = data.content.map[i];
                 draw_pixel(x, y, data.content.map[i]);
+            }
         }
         finish_loading();
     }
 
     else if (data.type == 'need_reauth') {
-
+        socket.close();
         window.location.replace(auth_url);
     }
 
@@ -95,32 +91,54 @@ socket.onmessage = function (event) {
         globalThis.last_pixel_drawn_time = data.content;
     }
 
-    // TODO: too_early, placed_time
+    else if (data.type == 'too_early') {
+        globalThis.add_snackbar_error_alert('Пиксель не поставлен! Кулдаун ещё не прошёл...')
+    }
 };
 
-function show_error_alert() {
-    document.querySelector(".alert_load_error").style.removeProperty('display');
-    document.querySelector(".palette").style['display'] = 'none';
-}
+// function show_error_alert(text) {
+//     document.querySelector(".alert_load_error").style.removeProperty('display');
+//     document.querySelector(".palette").style['display'] = 'none';
+// }
 
 socket.onclose = function (event) {
-    console.log('ws error:');
+    console.log('ws closed:');
     console.log(event);
+
+    globalThis.socket_opened = false;
 
     if (event.wasClean) {
         console.log(`[close] Соединение закрыто чисто, код=${event.code} причина=${event.reason}`);
     } else {
         console.log('[close] Соединение прервано');
+
+        // setTimeout(() => { create_socket(); }, 5000);
+        // setTimeout(() => { handle_error(); }, 10000);
     }
 
-    show_error_alert();
+    // show_error_alert();
 };
+
+// function handle_error() {
+//     if (socket_opened) {
+//         return;
+//     }
+
+//     show_error_alert();
+// }
+
+// function create_socket() {
+//     console.log('creating socket instance...');
+//     socket = new WebSocket(ws_url + '?time=' + Date.now());
+//     console.log('created socket instance!');
+// }
 
 socket.onerror = function (error) {
     console.log('ws error:');
     console.log(error);
 
-    show_error_alert();
+    // setTimeout(() => { create_socket(); }, 1000);
+    // setTimeout(() => { handle_error(); }, 5000); // 5s
 };
 
 export { send_pixel };

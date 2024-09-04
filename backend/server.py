@@ -3,7 +3,7 @@ import time
 import asyncio
 import logging
 
-from fastapi import FastAPI, Response
+from fastapi import FastAPI
 from fastapi.websockets import WebSocket
 from fastapi.responses import RedirectResponse
 
@@ -22,7 +22,7 @@ current_event_number = 1
 
 app = FastAPI()
 
-logger = logging.getLogger('uvicorn.error')
+logger = logging.getLogger('uvicorn.info')
 
 
 async def broadcast_pixel_impl(params) -> None:
@@ -30,7 +30,7 @@ async def broadcast_pixel_impl(params) -> None:
     try:
         await user.send_text(data)
     except Exception as err:
-        logger.error('broadcast err:', err)
+        logger.info(f'broadcast err: {err}')
 
 
 async def broadcast_pixel(x, y, color, event_id) -> None:
@@ -48,20 +48,22 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
     cookies = dict(websocket.cookies.items())
 
     if 'auth_token' not in cookies:
-        logger.error(f'auth_token not in cookies: {cookies}')
+        logger.info(f'auth_token not in cookies: {cookies}')
         await websocket.send_text(json.dumps({'type': 'need_reauth', 'error': 'no_cookie'}))
         return
 
     user_id, last_placed = await get_user_by_cookie(cookies['auth_token'])
-    logger.error('get_user_by_cookie', user_id, cookies)
+    logger.info(f'get_user_by_cookie {user_id} {cookies}')
     if user_id == -1:
-        logger.error('user not found', cookies)
+        logger.info(f'user not found {cookies}')
         await websocket.send_text(json.dumps({'type': 'need_reauth', 'error': 'user_not_found'}))
         return
 
     local_uid = current_uid_number
     current_uid_number += 1
     clients[local_uid] = websocket
+
+    # all returns later HAVE to remove client from list!
 
     await websocket.send_text(json.dumps({'type': 'draw_initial_map', 'content': {'map': canvas.get_map(), 'last_placed': last_placed}}))
 
@@ -83,16 +85,16 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
                 current_event_number += 1
                 await broadcast_pixel(x, y, color, event_id)
             else:
-                logger.error('unknown message recieved!', message)
+                logger.info(f'unknown message recieved! {message}')
 
         except starlette.websockets.WebSocketDisconnect:
-            logger.error('disconnect')
+            logger.info('disconnect')
             del clients[local_uid]
             return
         except Exception as err:
-            logger.error('unknown err', err)
-            del clients[local_uid]
-            return
+            logger.info(f'unknown err {err}')
+            # del clients[local_uid]
+            # return
 
 
 @ app.get("/get_auth_url")
@@ -101,7 +103,7 @@ async def yandex_get_auth_url() -> RedirectResponse:
 
 
 @ app.get("/handle_code")
-async def yandex_get_user_info(code: str, cid: str) -> RedirectResponse:  # cid - ???
+async def yandex_get_user_info(code: str, cid: str) -> RedirectResponse:  # cid - username, not needed
     user = await get_user_by_code(code)
     # TODO: only phystech.edu mails
     cookie = await handle_user_auth(user.default_email)
