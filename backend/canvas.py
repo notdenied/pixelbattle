@@ -29,6 +29,7 @@ class Canvas:
             session.commit()
 
     async def handle_put_pixel(self, user_id):
+        # known problem: possible race condition?
         with Session(engine) as session:
             query = select(User).where(User.user_id == user_id)
             user = session.scalars(query).one_or_none()

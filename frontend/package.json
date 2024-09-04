@@ -4,7 +4,8 @@
   "main": "index.html",
   "scripts": {
     "start": "python3 fix.py $(pwd) && parcel index.html --open",
-    "build": "python3 fix.py $(pwd) && parcel build index.html"
+    "build": "python3 fix.py $(pwd) && parcel build index.html",
+    "prod_build": "python3 fix.py $(pwd) && parcel build index.html --no-source-maps"
   },
   "dependencies": {
     "@emotion/styled": "^11.13.0",
@@ -17,7 +18,8 @@
     "pixi-viewport": "^4.38.0",
     "pixi.js": "^6.5.10",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "serve": "^14.2.3"
   },
   "devDependencies": {
     "@babel/core": "7.2.0",
