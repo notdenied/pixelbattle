@@ -6,11 +6,12 @@ import logging
 from fastapi import FastAPI
 from fastapi.websockets import WebSocket
 from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
 
 import starlette.websockets
 
 from auth import *
-from config import front_url
+from config import front_url, is_game_ended
 from canvas import Canvas
 
 
@@ -52,18 +53,26 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
         await websocket.send_text(json.dumps({'type': 'need_reauth', 'error': 'no_cookie'}))
         return
 
-    user_id, last_placed = await get_user_by_cookie(cookies['auth_token'])
+    user_id, last_placed, is_admin = await get_user_by_cookie(cookies['auth_token'])
     logger.info(f'get_user_by_cookie {user_id} {cookies}')
     if user_id == -1:
         logger.info(f'user not found {cookies}')
         await websocket.send_text(json.dumps({'type': 'need_reauth', 'error': 'user_not_found'}))
         return
 
+    if is_game_ended:
+        await websocket.send_text(json.dumps({'type': 'draw_initial_map', 'content': {'map': canvas.get_map(), 'last_placed': last_placed}}))
+        await websocket.send_text(json.dumps({'type': 'game_ended'}))
+        return
+
+    if is_admin:
+        await websocket.send_text(json.dumps({'type': 'set_admin'}))
+
     local_uid = current_uid_number
     current_uid_number += 1
     clients[local_uid] = websocket
 
-    # all returns later HAVE to remove client from list!
+    # all returns later HAVE to remove client from list before return!
 
     await websocket.send_text(json.dumps({'type': 'draw_initial_map', 'content': {'map': canvas.get_map(), 'last_placed': last_placed}}))
 
@@ -74,7 +83,7 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
             if message['type'] == 'put_pixel':
                 x, y, color = message['content']['x'], message['content']['y'], message['content']['color']
                 time_placed = await canvas.handle_put_pixel(user_id)
-                if not time_placed:
+                if not time_placed and not is_admin:  # bypass time check for admin
                     await websocket.send_text(json.dumps({'type': 'too_early', 'content': time_placed}))
                     continue
                 else:
@@ -97,15 +106,21 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
             # return
 
 
-@ app.get("/get_auth_url")
+@app.get("/get_auth_url")
 async def yandex_get_auth_url() -> RedirectResponse:
     return RedirectResponse(get_auth_url())
 
 
-@ app.get("/handle_code")
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+@app.get("/handle_code")
 async def yandex_get_user_info(code: str, cid: str) -> RedirectResponse:  # cid - username, not needed
     user = await get_user_by_code(code)
-    # TODO: only phystech.edu mails
+
+    if not user.default_email.endswith('@phystech.edu'):  # type: ignore
+        return RedirectResponse('/static/email_error.html')
+
     cookie = await handle_user_auth(user.default_email)
 
     response = RedirectResponse(front_url)

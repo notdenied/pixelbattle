@@ -1,11 +1,13 @@
 import json
 
 
-debug = True
+debug = False
 
 with open('config.json') as f:
     data = json.load(f)
 
+admin_ids = data['admin_ids']
+is_game_ended = data['is_game_ended']
 
 db_user = data['db_user']
 db_password = data['db_password']

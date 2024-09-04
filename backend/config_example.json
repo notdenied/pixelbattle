@@ -1,0 +1,12 @@
+{
+    "admin_ids": [
+        1
+    ],
+    "is_game_ended": false,
+    "db_user": "root",
+    "db_password": "123",
+    "yandex_client_id": "1234",
+    "yandex_client_secret": "5678",
+    "yandex_redirect_url": "https://ws.c3po.ru/handle_code",
+    "front_url": "https://pb.c3po.ru/"
+}

@@ -15,6 +15,11 @@ function finish_loading() {
 }
 
 function send_pixel(x, y, color) {
+    if (globalThis.game_ended) {
+        globalThis.add_snackbar_info_alert('Пиксель не поставлен - игра окончена, спасибо за участие!');
+        return;
+    }
+
     if (!globalThis.socket_opened) {
         globalThis.add_snackbar_error_alert('Нет соединения с сервером! Попробуйте обновить страницу...');
         return;
@@ -26,7 +31,7 @@ function send_pixel(x, y, color) {
     }
 
     let time = draw_cooldown * 1000 - (Date.now() - globalThis.last_pixel_drawn_time);
-    if (time >= 0) {
+    if (time >= 0 && !globalThis.is_admin) {
         // time = Math.ceil(time / 1000);
         globalThis.add_snackbar_info_alert('Пиксель не поставлен - кулдаун ещё не прошёл!');
         return;
@@ -93,6 +98,17 @@ socket.onmessage = function (event) {
 
     else if (data.type == 'too_early') {
         globalThis.add_snackbar_error_alert('Пиксель не поставлен! Кулдаун ещё не прошёл...')
+    }
+
+    else if (data.type == 'game_ended') {
+        globalThis.add_snackbar_success_alert('Игра закончена. Спасибо! <3');
+        globalThis.game_ended = true;
+        socket.close();
+    }
+
+    else if (data.type == 'set_admin') {
+        globalThis.add_snackbar_success_alert('Админские права применены!');
+        globalThis.is_admin = true;
     }
 };
 

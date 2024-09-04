@@ -12,7 +12,7 @@ class Canvas:
         with Session(engine) as session:
             res = select(Pixel)
             pixels = session.scalars(res).all()
-            self.data = [f'#FFFFFF' for _ in range(WIDTH*HEIGHT)]
+            self.data = [f'0x000000' for _ in range(WIDTH*HEIGHT)]
             for pixel in pixels:
                 self.data[pixel.y * WIDTH + pixel.x] = pixel.color
 

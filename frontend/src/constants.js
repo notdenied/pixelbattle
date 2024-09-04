@@ -13,6 +13,6 @@ const colors = ["000000", "858585", "FFFFFF", "FF218B", "FE2000", "FFA500", "FCF
 const debug = false;
 
 const ws_url = debug ? 'ws://localhost:8000/ws' : 'wss://ws.c3po.ru/ws';
-const auth_url = debug ? 'http://localhost:8000/get_auth_url' : "https://ws.c3po.ru/get_auth_url";
+const auth_url = debug ? 'http://localhost:8000/static/rules.html' : "https://ws.c3po.ru/static/rules.html";
 
 export { draw_cooldown, width, height, default_zoom, min_scale, max_scale, back_color, colors, ws_url, auth_url };

@@ -23,6 +23,10 @@ npm i
 ```
 cd frontend && npm start
 ```
+or
+```
+cd frontend && npm run build && cd dist && npx serve -n -l 1234
+```
 
 settings:
 ```

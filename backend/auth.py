@@ -3,7 +3,7 @@ import uuid
 from yandexid import AsyncYandexOAuth
 from yandexid import AsyncYandexID
 
-from config import yandex_client_id, yandex_client_secret, yandex_redirect_url
+from config import yandex_client_id, yandex_client_secret, yandex_redirect_url, admin_ids
 from database import *
 
 from sqlalchemy.orm import Session
@@ -48,4 +48,4 @@ async def get_user_by_cookie(auth_token):
     with Session(engine) as session:
         res = select(User).where(User.cookie == auth_token)
         user = session.scalars(res).one_or_none()
-        return (user.user_id, user.last_pixel_time) if user else (-1, -1)
+        return (user.user_id, user.last_pixel_time, user.user_id in admin_ids) if user else (-1, -1, False)
