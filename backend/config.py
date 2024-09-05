@@ -1,7 +1,7 @@
 import json
 
 
-debug = True
+debug = False
 
 with open('config.json') as f:
     data = json.load(f)
