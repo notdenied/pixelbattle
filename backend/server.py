@@ -89,10 +89,12 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
                 else:
                     await websocket.send_text(json.dumps({'type': 'placed_time', 'content': time_placed}))
 
-                await canvas.put_pixel(x, y, color)
+                await canvas.put_pixel(x, y, color, user_id)
                 event_id = current_event_number
                 current_event_number += 1
                 await broadcast_pixel(x, y, color, event_id)
+            elif message['type'] == 'sync_time':
+                await websocket.send_text(json.dumps({'type': 'sync_time', 'content': round(time.time()*1000)}))
             else:
                 logger.info(f'unknown message recieved! {message}')
 

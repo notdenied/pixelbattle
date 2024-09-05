@@ -21,7 +21,8 @@ class Pixel(Base):
     __tablename__ = "pixels"
     x: Mapped[int] = mapped_column(index=True, primary_key=True)
     y: Mapped[int] = mapped_column(index=True, primary_key=True)
-    color: Mapped[str] = mapped_column(String(10))
+    color: Mapped[str] = mapped_column(String(10), default='0x000000')
+    user_id: Mapped[int] = mapped_column(default=0)
 
 
 class User(Base):

@@ -16,20 +16,21 @@ class Canvas:
             for pixel in pixels:
                 self.data[pixel.y * WIDTH + pixel.x] = pixel.color
 
-    async def put_pixel(self, x, y, color):
+    async def put_pixel(self, x, y, color, user_id):
         self.data[y * WIDTH + x] = color
         with Session(engine) as session:
             query = select(Pixel).where(Pixel.x == x).where(Pixel.y == y)
             pixel = session.scalars(query).one_or_none()
             if pixel:
                 pixel.color = color
+                pixel.user_id = user_id
             else:
-                session.add(Pixel(x=x, y=y, color=color))
+                session.add(Pixel(x=x, y=y, color=color, user_id=user_id))
 
             session.commit()
 
     async def handle_put_pixel(self, user_id):
-        # known problem: possible race condition?
+        # known problem: possible race condition with workers > 1?
         with Session(engine) as session:
             query = select(User).where(User.user_id == user_id)
             user = session.scalars(query).one_or_none()
@@ -40,7 +41,7 @@ class Canvas:
             if cur_time - user.last_pixel_time >= COOLDOWN:
                 user.last_pixel_time = cur_time
                 session.commit()
-                print('placed...', cur_time, user.last_pixel_time)
+                # print('placed...', cur_time, user.last_pixel_time)
                 return cur_time  # rework?
             else:
                 return False

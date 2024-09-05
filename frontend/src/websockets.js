@@ -55,9 +55,13 @@ var pixels_colors = new Array(width * height).fill(0);
 let socket = new ReconnectingWebSocket(ws_url + '?time=' + Date.now());
 globalThis.socket_opened = false;
 
+let send_sync_event_time = 0;
+
 socket.onopen = function (e) {
     console.log("[open]");
     globalThis.socket_opened = true;
+
+
 };
 
 socket.onmessage = function (event) {
@@ -84,6 +88,9 @@ socket.onmessage = function (event) {
                 draw_pixel(x, y, data.content.map[i]);
             }
         }
+
+        send_sync_event_time = Date.now();
+        socket.send(JSON.stringify({ 'type': 'sync_time' }));
         finish_loading();
     }
 
@@ -93,7 +100,7 @@ socket.onmessage = function (event) {
     }
 
     else if (data.type == 'placed_time') {
-        globalThis.last_pixel_drawn_time = data.content;
+        globalThis.last_pixel_drawn_time = data.content + globalThis.timedelta;
     }
 
     else if (data.type == 'too_early') {
@@ -109,6 +116,19 @@ socket.onmessage = function (event) {
     else if (data.type == 'set_admin') {
         globalThis.add_snackbar_success_alert('Админские права применены!');
         globalThis.is_admin = true;
+    }
+
+    else if (data.type == 'sync_time') {
+        let our_time = Date.now();
+        let send_recieve_time = our_time - send_sync_event_time;
+        let cur_server_time = data.content + send_recieve_time / 2;
+        globalThis.timedelta = our_time - cur_server_time;
+        console.log('send + receive (in ms): ' + send_recieve_time);
+        console.log('timedelta (our - server): ' + globalThis.timedelta);
+    }
+
+    else {
+        globalThis.add_snackbar_error_alert('Получено неизвестное событие: ' + data);
     }
 };
 

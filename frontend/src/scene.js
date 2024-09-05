@@ -42,6 +42,15 @@ export const viewport = new Viewport({
     // minHeight: config.zoom.minLevelPx
   })
   .moveCenter(new Point(width / 2, height / 2)).decelerate();
+// .clamp({ direction: 'all', left: -width * 0.1, right: width * 1.9, top: -height * 0.1, bottom: height * 1.9 });
+
+
+// experimental
+viewport.bounce({
+  friction: 0,
+  bounceBox: new PIXI.Rectangle(-500, -500, 600, 600)
+})
+
 
 function pos_to_coords(pos) {
   return { x: Math.round(pos.x - 0.5), y: Math.round(pos.y - 0.5) };

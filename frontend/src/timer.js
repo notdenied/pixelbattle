@@ -20,7 +20,7 @@ const Timer = () => {
         if (time < 0) {
             setSeconds('ok');
         } else {
-            time = Math.ceil(time / 1000);
+            time = Math.min(Math.ceil(time / 1000), draw_cooldown);
             if (time < 10) {
                 setSeconds('0' + time);
             }
@@ -31,7 +31,7 @@ const Timer = () => {
     };
 
     useEffect(() => {
-        const interval = setInterval(() => getTime(), 200);
+        const interval = setInterval(() => getTime(), 100);
 
         return () => clearInterval(interval);
     }, []);
