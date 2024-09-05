@@ -25,7 +25,7 @@ function Notification(props) {
             <div className="snackbar_alert">{msg}</div>,
             {
                 variant: "info",
-                autoHideDuration: 7000,
+                autoHideDuration: 6000,
                 anchorOrigin: { vertical: "top", horizontal: "right" }
             });
     }
@@ -35,7 +35,7 @@ function Notification(props) {
             <div className="snackbar_alert">{msg}</div>,
             {
                 variant: "success",
-                autoHideDuration: 7000,
+                autoHideDuration: 6000,
                 anchorOrigin: { vertical: "top", horizontal: "right" }
             });
     }

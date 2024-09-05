@@ -57,7 +57,7 @@ function pos_to_coords(pos) {
 }
 
 function handle_click(x, y) {
-  if (x < 0 || y < 0 || x > width || y > height) {
+  if (x < 0 || y < 0 || x >= width || y >= height) {
     return;
   }
 

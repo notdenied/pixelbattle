@@ -2,7 +2,7 @@ const width = 100;
 const height = 100;
 
 const default_zoom = -0.1;
-const max_scale = 75;
+const max_scale = 50; // 75;
 const min_scale = 2;
 
 const draw_cooldown = 10;
