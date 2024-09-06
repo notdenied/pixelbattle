@@ -38,7 +38,7 @@ class Canvas:
                 print("USER NOT FOUND! in handle")
                 return False  # ???
             cur_time = round(time.time()*1000)
-            if cur_time - user.last_pixel_time >= COOLDOWN:
+            if cur_time - user.last_pixel_time >= COOLDOWN * 1000:
                 user.last_pixel_time = cur_time
                 session.commit()
                 # print('placed...', cur_time, user.last_pixel_time)

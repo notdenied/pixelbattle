@@ -82,7 +82,7 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
 
             if message['type'] == 'put_pixel':
                 x, y, color = message['content']['x'], message['content']['y'], message['content']['color']
-                time_placed = await canvas.handle_put_pixel(user_id)
+                time_placed = await canvas.handle_put_pixel(user_id)  # false if can't place a pixel and time of place else
                 if not time_placed and not is_admin:  # bypass time check for admin
                     await websocket.send_text(json.dumps({'type': 'too_early', 'content': time_placed}))
                     continue
