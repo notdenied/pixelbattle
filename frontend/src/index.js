@@ -1,7 +1,7 @@
-import { GraphPaper, GraphStyle } from "pixi-graphpaper";
+// import { GraphPaper, GraphStyle } from "pixi-graphpaper";
 import { viewport, app } from "./scene";
 import { box } from './graphics';
-import { width, height } from "./constants";
+// import { width, height } from "./constants";
 import App from './bottom';
 
 import { LoadingScreen } from "./loading";
@@ -15,10 +15,10 @@ import ReactDOM from 'react-dom/client';
 
 
 // Background grid for reference
-const paper = new GraphPaper(GraphStyle.BLUEPRINT)
-paper.graphHeight = height;
-paper.graphWidth = width;
-viewport.addChild(paper);
+// const paper = new GraphPaper(GraphStyle.BLUEPRINT)
+// paper.graphHeight = height;
+// paper.graphWidth = width;
+// viewport.addChild(paper);
 
 viewport.addChild(box);
 

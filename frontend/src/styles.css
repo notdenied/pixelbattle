@@ -5,8 +5,6 @@ body {
 }
 
 canvas {
-  width: 100vw;
-  height: 100vh;
   display: block;
 }
 
@@ -47,7 +45,7 @@ canvas {
 /* ----------------------------------- */
 
 .color {
-  --size: 22px;
+  --size: 30px;
   width: var(--size);
   height: var(--size);
   display: block;
@@ -55,7 +53,7 @@ canvas {
   border-radius: 50%;
   cursor: pointer;
   position: relative;
-  padding: 10px;
+  /* padding: 10px; */
   transition: all 0.1s ease-in;
   animation: appear 0.1s ease-in;
 }
@@ -63,14 +61,44 @@ canvas {
 .timer {
   display: block;
   padding-left: 15px;
-  padding-top: 4px; /* ???? */
+  padding-top: 4px;
+  /* ???? */
   color: #fff;
   font-weight: bold;
   text-align: center;
   font-family: 'Courier New', Courier, monospace;
   /* font-family: Arial, "Helvetica Neue", Helvetica, sans-serif; */
-  font-size: x-large;
+  font-size: 2em;
 }
+
+.color_mobile {
+  --size: 5.5vw;
+  width: var(--size);
+  height: var(--size);
+  display: block;
+  appearance: none;
+  border-radius: 50%;
+  cursor: pointer;
+  position: relative;
+  /* padding: 0vw; */
+  transition: all 0.1s ease-in;
+  animation: appear 0.1s ease-in;
+}
+
+.timer_mobile {
+  display: block;
+  padding-left: 12px;
+  padding-top: 0.85vw;
+  /* ???? */
+  color: #fff;
+  font-weight: bold;
+  text-align: center;
+  font-family: 'Courier New', Courier, monospace;
+  /* font-family: Arial, "Helvetica Neue", Helvetica, sans-serif; */
+  font-size: 6vw;
+}
+
+/* -------------------- */
 
 .snackbar_alert {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -94,7 +122,16 @@ canvas {
   outline: 2px solid #333333;
 }
 
+.color_mobile:hover {
+  outline: 2px solid #333333;
+}
+
 .color:checked {
+  outline: 2px solid #FFF;
+  outline-offset: 2px;
+}
+
+.color_mobile:checked {
   outline: 2px solid #FFF;
   outline-offset: 2px;
 }

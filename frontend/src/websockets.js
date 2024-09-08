@@ -37,9 +37,11 @@ function send_pixel(x, y, color) {
         return;
     }
 
-    globalThis.last_pixel_drawn_time = Date.now(); // TODO: add ~ping?
+    if (!globalThis.is_admin) {
+        globalThis.last_pixel_drawn_time = Date.now();
+    }
 
-    // Костыль: рисуем у себя локально с минимальным приоритетом, затем высылаем.
+    // Костыль: рисуем у себя локально с минимальным приоритетом, затем высылаем и получаем время установки.
     socket.send(JSON.stringify({ 'type': 'put_pixel', 'content': { 'x': x, 'y': y, 'color': color } }));
     pixels_priority[y * width + x] = 0;
     draw_pixel(x, y, color);

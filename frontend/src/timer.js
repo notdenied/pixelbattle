@@ -36,8 +36,10 @@ const Timer = () => {
         return () => clearInterval(interval);
     }, []);
 
+    const is_mobile = window.innerWidth / window.innerHeight < 1;
+
     return (
-        <div className="timer" >
+        <div className={is_mobile ? "timer_mobile" : "timer"} >
             {seconds}
         </div>
     );

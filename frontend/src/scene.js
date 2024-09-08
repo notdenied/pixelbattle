@@ -48,7 +48,7 @@ export const viewport = new Viewport({
 // experimental
 viewport.bounce({
   friction: 0,
-  bounceBox: new PIXI.Rectangle(-500, -500, 600, 600)
+  bounceBox: new PIXI.Rectangle(-500, -500, 500 + width, 500 + height)
 })
 
 

@@ -5,13 +5,13 @@ import logging
 
 from fastapi import FastAPI
 from fastapi.websockets import WebSocket
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 import starlette.websockets
 
 from auth import *
-from config import front_url, is_game_ended
+from config import front_url, is_game_ended, allow_any_mail
 from canvas import Canvas
 
 
@@ -87,7 +87,7 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
                     await websocket.send_text(json.dumps({'type': 'too_early', 'content': time_placed}))
                     continue
                 else:
-                    await websocket.send_text(json.dumps({'type': 'placed_time', 'content': time_placed}))
+                    await websocket.send_text(json.dumps({'type': 'placed_time', 'content': time_placed if not is_admin else 0}))
 
                 await canvas.put_pixel(x, y, color, user_id)
                 event_id = current_event_number
@@ -117,15 +117,16 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 @app.get("/handle_code")
-async def yandex_get_user_info(code: str, cid: str) -> RedirectResponse:  # cid - username, not needed
+async def yandex_get_user_info(code: str, cid: str):  # cid - username, not needed
     user = await get_user_by_code(code)
 
-    if not user.default_email.endswith('@phystech.edu'):  # type: ignore
+    if not user.default_email.endswith('@phystech.edu') and not allow_any_mail:  # type: ignore
         return RedirectResponse('/static/email_error.html')
 
     cookie = await handle_user_auth(user.default_email)
 
-    response = RedirectResponse(front_url)
+    script = f"<script>window.location.href='{front_url}';</script>"
+    response = HTMLResponse(content=script)
     response.set_cookie(key="auth_token", value=cookie, expires=int(time.time()) + 365 * 86400, secure=True, httponly=True)
 
     return response

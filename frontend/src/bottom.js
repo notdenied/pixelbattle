@@ -10,6 +10,7 @@ class ColorPalette extends Component {
   }
 
   render() {
+    const is_mobile = window.innerWidth / window.innerHeight < 1;
     return (
       <div>
         <div className='palette' style={{ display: 'none' }}>
@@ -17,7 +18,7 @@ class ColorPalette extends Component {
             <Timer />
             <div className="container">
               {colors.map(color =>
-                <input type='radio' key={color} className='color' value={'0x' + color} style={{ backgroundColor: '#' + color }} onClick={(e) => { globalThis.color = e.target.value; }} name="color" />
+                <input type='radio' key={color} className={is_mobile ? 'color_mobile' : 'color'} value={'0x' + color} style={{ backgroundColor: '#' + color }} onClick={(e) => { globalThis.color = e.target.value; }} name="palette_color" />
               )}
             </div>
           </div>

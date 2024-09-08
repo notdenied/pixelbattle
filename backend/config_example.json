@@ -3,6 +3,10 @@
         1
     ],
     "is_game_ended": false,
+    "allow_any_mail": false,
+    "width": 150,
+    "height": 150,
+    "draw_cooldown": 15,
     "db_user": "root",
     "db_password": "123",
     "yandex_client_id": "1234",

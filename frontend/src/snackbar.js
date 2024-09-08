@@ -1,14 +1,14 @@
 import React from "react";
 import { SnackbarProvider } from "notistack";
 import { useSnackbar } from "notistack";
-import { Button, Alert } from "@mui/material";
+// import { Button, Alert } from "@mui/material";
 
 import './globals';
 
 function Notification(props) {
     const { enqueueSnackbar } = useSnackbar();
 
-    // Как будто бы теперь нет кейса, где мне нужно давать кнопку для релоада?
+    // Как будто бы теперь нет кейса, где мне нужно давать кнопку для релоада? Ну и это сложно -> скип.
 
     globalThis.add_snackbar_error_alert = (msg) => {
         enqueueSnackbar(
@@ -25,7 +25,7 @@ function Notification(props) {
             <div className="snackbar_alert">{msg}</div>,
             {
                 variant: "info",
-                autoHideDuration: 6000,
+                autoHideDuration: 5000,
                 anchorOrigin: { vertical: "top", horizontal: "right" }
             });
     }
@@ -35,7 +35,7 @@ function Notification(props) {
             <div className="snackbar_alert">{msg}</div>,
             {
                 variant: "success",
-                autoHideDuration: 6000,
+                autoHideDuration: 5000,
                 anchorOrigin: { vertical: "top", horizontal: "right" }
             });
     }

@@ -8,6 +8,11 @@ with open('config.json') as f:
 
 admin_ids = data['admin_ids']
 is_game_ended = data['is_game_ended']
+allow_any_mail = data['allow_any_mail']
+
+map_width = data['width']
+map_height = data['height']
+draw_cooldown = data['draw_cooldown']
 
 db_user = data['db_user']
 db_password = data['db_password']
