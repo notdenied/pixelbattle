@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 import starlette.websockets
 
 from auth import *
-from config import front_url, is_game_ended, allow_any_mail
+from config import front_url, is_game_ended, allow_any_mail, yandex_redirect_url
 from canvas import Canvas
 
 
@@ -127,6 +127,7 @@ async def yandex_get_user_info(code: str, cid: str):  # cid - username, not need
 
     script = f"<script>window.location.href='{front_url}';</script>"
     response = HTMLResponse(content=script)
-    response.set_cookie(key="auth_token", value=cookie, expires=int(time.time()) + 365 * 86400, secure=True, httponly=True)
+    domain = yandex_redirect_url.removeprefix('https://').removeprefix('http://').removesuffix('/handle_code')  # cringe
+    response.set_cookie(key="auth_token", value=cookie, max_age=30 * 86400, domain=domain, secure=True, httponly=True, samesite='lax')
 
     return response
